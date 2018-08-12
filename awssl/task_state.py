@@ -40,7 +40,7 @@ class Task(StateRetryCatch):
 
 	"""
 
-	def __init__(self, Name=None, Comment="", InputPath="$", OutputPath="$", NextState=None, EndState=None, 
+	def __init__(self, Name=None, Comment="", InputPath="$", OutputPath="$", NextState=None, EndState=False,
 					ResultPath="$", RetryList=None, CatcherList=None,
 					ResourceArn=None, TimeoutSeconds=99999999, HeartbeatSeconds=99999999):
 		"""
@@ -77,8 +77,8 @@ class Task(StateRetryCatch):
 		:type: HeartbeatSeconds: int
 
 		"""
-		super(Task, self).__init__(Name=Name, Type="Task", Comment=Comment, 
-			InputPath=InputPath, OutputPath=OutputPath, NextState=NextState, EndState=EndState, 
+		super(Task, self).__init__(Name=Name, Type="Task", Comment=Comment,
+			InputPath=InputPath, OutputPath=OutputPath, NextState=NextState, EndState=EndState,
 			ResultPath=ResultPath, RetryList=RetryList, CatcherList=CatcherList)
 		self._resource_arn = None
 		self._timeout_seconds = None
@@ -92,7 +92,7 @@ class Task(StateRetryCatch):
 		Validates this instance is correctly specified.
 
 		Raises ``Exception`` with details of the error, if the state is incorrectly defined.
-		
+
 		"""
 		super(Task, self).validate()
 
@@ -101,7 +101,7 @@ class Task(StateRetryCatch):
 		Returns the JSON representation of this instance.
 
 		:returns: dict -- The JSON representation
-		
+
 		"""
 		j = super(Task, self).to_json()
 		j["Resource"] = self.get_resource_arn()
@@ -124,11 +124,11 @@ class Task(StateRetryCatch):
 		Sets the Arn of the Lambda of ``Activity`` to be invoked by this ``Task``.  Cannot be ``None`` and must be a valid Arn formatted string.
 
 		:param ResourceArn: [Required] The Arn for the ``Lambda`` function or ``Activity`` that the ``Task`` should invoke
-		:type: ResourceArn: str		
+		:type: ResourceArn: str
 		"""
 		if not ResourceArn:
 			raise Exception("ResourceArn must be specified for Task state (step '{}')".format(self.get_name()))
-		if not isinstance(ResourceArn, str):
+		if not isinstance(ResourceArn, basestring):
 			raise Exception("ResourceArn must be a string for Task state (step '{}')".format(self.get_name()))
 		self._resource_arn = ResourceArn
 
@@ -217,6 +217,6 @@ class Task(StateRetryCatch):
 			c.set_catcher_list(CatcherList=[ c.clone(NameFormatString) for c in self.get_catcher_list() ])
 
 		if self.get_next_state():
-			c.set_next_state(NextState=self.get_next_state.clone(NameFormatString))	
+			c.set_next_state(NextState=self.get_next_state.clone(NameFormatString))
 
 		return c
